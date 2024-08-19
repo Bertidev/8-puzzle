@@ -1,21 +1,23 @@
 import random
 
-def trocar_posicoes(lista, pos1, pos2):
+def trocar_horizontal(lista, pos1, pos2):
     lista[pos1], lista[pos2] = lista[pos2], lista[pos1]
-    return lista
 
-def is_solvable(puzzle):
-    def count_inversions(puzzle):
-        one_d_puzzle = [num for row in puzzle for num in row if num != 0]
-        inversions = 0
-        for i in range(len(one_d_puzzle)):
-            for j in range(i + 1, len(one_d_puzzle)):
-                if one_d_puzzle[i] > one_d_puzzle[j]:
-                    inversions += 1
-        return inversions
+def trocar_vertical(mat, linha1, coluna1, linha2, coluna2):
+    mat[linha1][coluna1], mat[linha2][coluna2] = mat[linha2][coluna2], mat[linha1][coluna1]
 
-    inversions = count_inversions(puzzle)
-    return inversions % 2 == 0
+def resolvivel(puzzle):
+    def conta_inversoes(puzzle):
+        lista_total = [num for row in puzzle for num in row if num != 0]
+        inversoes = 0
+        for i in range(len(lista_total)):
+            for j in range(i + 1, len(lista_total)):
+                if lista_total[i] > lista_total[j]:
+                    inversoes += 1
+        return inversoes
+
+    inversoes = conta_inversoes(puzzle)
+    return inversoes % 2 == 0
 
 def gera_matriz_aleatoria():
     numeros = list(range(9))
@@ -23,7 +25,7 @@ def gera_matriz_aleatoria():
     matriz = [numeros[i:i+3] for i in range(0, 9, 3)]
     return matriz
 
-def verifica():
+def nao_resolvida():
     matriz_final = [
         [1, 2, 3],
         [4, 5, 6],
@@ -32,55 +34,35 @@ def verifica():
     
     matriz = gera_matriz_aleatoria()
     
-    while not is_solvable(matriz):
+    while not resolvivel(matriz):
         matriz = gera_matriz_aleatoria()
 
     return matriz
 
-def horizontal(mat):
+def encontrar_posicao(mat, num):
     for i in range(3):
         for j in range(3):
-            if mat[i][j] == 0:
-                linha = i
-                coluna = j
-    num = int(input('Qual número deseja mover?'))  
-    coluna_num = -1            
-    for k in range(3):
-        if mat[linha][k] == num:
-            coluna_num = k
+            if mat[i][j] == num:
+                return i, j
+    return None, None
+
+def mover_numero(mat, num):
+    linha_num, coluna_num = encontrar_posicao(mat, num)
+    linha_zero, coluna_zero = encontrar_posicao(mat, 0)
     
-    if coluna_num == -1:
-        print('Número não encontrado na mesma linha.')
+    if linha_num is None or coluna_num is None:
+        print('Número não encontrado.')
         return
     
-    if abs(coluna - coluna_num) == 1:
-        trocar_posicoes(mat[linha], coluna, coluna_num)
+    if (abs(linha_zero - linha_num) == 1 and coluna_zero == coluna_num):  #movimento vertical
+        trocar_vertical(mat, linha_num, coluna_num, linha_zero, coluna_zero)
+    elif (abs(coluna_zero - coluna_num) == 1 and linha_zero == linha_num):  #movimento horizontal
+        trocar_horizontal(mat[linha_num], coluna_num, coluna_zero)
     else:
-        print('Movimento horizontal não válido.')
+        print('Movimento não válido.')
 
-def vertical(mat):
-    for i in range(3):
-        for j in range(3):
-            if mat[i][j] == 0:
-                linha = i
-                coluna = j
-    num = int(input('Qual número deseja mover?'))  
-    linha_num = -1
-    for k in range(3):
-        if mat[k][coluna] == num:
-            linha_num = k
-    
-    if linha_num == -1:
-        print('Número não encontrado na mesma coluna.')
-        return
-    
-    if abs(linha - linha_num) == 1:
-        mat[linha][coluna], mat[linha_num][coluna] = mat[linha_num][coluna], mat[linha][coluna]
-    else:
-        print('Movimento vertical não válido.')
-
-# Inicialização
-matriz = verifica()
+#inicializacao
+matriz = nao_resolvida()
 
 print('Início')
 
@@ -92,12 +74,7 @@ while matriz != [
     for linha in matriz:
         print(linha)
     
-    entrada = input('Deseja mover na vertical(v) ou horizontal(h)? ')
-    if entrada == 'h':
-        horizontal(matriz)
-    elif entrada == 'v':
-        vertical(matriz)
-    else:
-        print('Entrada inválida. Por favor, escolha "v" ou "h".')
+    num = int(input('Qual número deseja mover? '))
+    mover_numero(matriz, num)
 
 print('Parabéns! Você resolveu o puzzle.')
