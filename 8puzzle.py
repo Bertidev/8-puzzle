@@ -11,15 +11,20 @@ def horizontal(mat):
                 linha = i
                 coluna = j
     num = int(input('Qual número deseja mover?'))  
+    err=0
+    coluna_num=9
     for k in range(3):
         if matriz[linha][k] == num:
             coluna_num = k
     if (coluna == 0) and (coluna_num == 1):
-        trocar_posicoes(mat[linha], coluna, k) 
+        trocar_posicoes(mat[linha], coluna, coluna_num) 
     elif (coluna == 2) and (coluna_num == 1):
-        trocar_posicoes(mat[linha], coluna, k) 
-    
-
+        trocar_posicoes(mat[linha], coluna, coluna_num) 
+    elif ((coluna == 1) and (coluna_num ==0)) or ((coluna ==1) and (coluna_num == 2)):
+        trocar_posicoes(mat[linha], coluna, coluna_num) 
+    else:
+        print('nao valido')
+ 
 def vertical(mat):
     for i in range(3):
         for j in range(3):
