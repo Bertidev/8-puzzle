@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import messagebox
 import random
 
 def trocar_horizontal(lista, pos1, pos2):
@@ -61,20 +63,34 @@ def mover_numero(mat, num):
     else:
         print('Movimento não válido.')
 
-#inicializacao
+def atualizar_interface():
+    for i in range(3):
+        for j in range(3):
+            botoes[i][j].config(text=str(matriz[i][j] if matriz[i][j] != 0 else ''))
+
+def clique_botao(i, j):
+    mover_numero(matriz, matriz[i][j])
+    atualizar_interface()
+    if matriz == [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 0]
+    ]:
+        messagebox.showinfo("Parabéns", "Você resolveu o puzzle!")
+
+#cria a janela
+janela = tk.Tk()
+janela.title("8-Puzzle")
+
+#inicializa o tabuleiro e interface
 matriz = nao_resolvida()
+botoes = [[None for _ in range(3)] for _ in range(3)]
 
-print('Início')
+for i in range(3):
+    for j in range(3):
+        botoes[i][j] = tk.Button(janela, text=str(matriz[i][j]), width=5, height=2,
+                                 command=lambda i=i, j=j: clique_botao(i, j))
+        botoes[i][j].grid(row=i, column=j)
 
-while matriz != [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 0]
-]:
-    for linha in matriz:
-        print(linha)
-    
-    num = int(input('Qual número deseja mover? '))
-    mover_numero(matriz, num)
-
-print('Parabéns! Você resolveu o puzzle.')
+atualizar_interface()
+janela.mainloop()
