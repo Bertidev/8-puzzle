@@ -1,4 +1,11 @@
 import random
+import os
+
+def clear():
+    if(os.name == 'posix'):
+        os.system('clear')
+    else:
+        os.system('cls')
 
 def trocar_horizontal(lista, pos1, pos2):
     lista[pos1], lista[pos2] = lista[pos2], lista[pos1]
@@ -56,16 +63,20 @@ def mover_numero(mat, num):
     
     if (abs(linha_zero - linha_num) == 1 and coluna_zero == coluna_num):  #movimento vertical
         trocar_vertical(mat, linha_num, coluna_num, linha_zero, coluna_zero)
+        clear()
     elif (abs(coluna_zero - coluna_num) == 1 and linha_zero == linha_num):  #movimento horizontal
         trocar_horizontal(mat[linha_num], coluna_num, coluna_zero)
+        clear()
     else:
-        print('Movimento não válido.')
+        clear()
+        print('Movimento não válido.') #remover so ta aqui pra debug
+        
 
 #inicializacao
 matriz = nao_resolvida()
 
 print('Início')
-
+clear()
 while matriz != [
     [1, 2, 3],
     [4, 5, 6],
