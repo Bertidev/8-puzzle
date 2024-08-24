@@ -1,6 +1,8 @@
 import random
 import os
 
+
+move_count = 0
 def clear():
     if(os.name == 'posix'):
         os.system('clear')
@@ -54,6 +56,7 @@ def encontrar_posicao(mat, num):
     return None, None
 
 def mover_numero(mat, num):
+    global move_count
     linha_num, coluna_num = encontrar_posicao(mat, num)
     linha_zero, coluna_zero = encontrar_posicao(mat, 0)
     
@@ -63,9 +66,11 @@ def mover_numero(mat, num):
     
     if (abs(linha_zero - linha_num) == 1 and coluna_zero == coluna_num):  #movimento vertical
         trocar_vertical(mat, linha_num, coluna_num, linha_zero, coluna_zero)
+        move_count += 1
         clear()
     elif (abs(coluna_zero - coluna_num) == 1 and linha_zero == linha_num):  #movimento horizontal
         trocar_horizontal(mat[linha_num], coluna_num, coluna_zero)
+        move_count += 1
         clear()
     else:
         clear()
@@ -87,5 +92,7 @@ while matriz != [
     
     num = int(input('Qual número deseja mover? '))
     mover_numero(matriz, num)
+    print(f"Total de movimentos: {move_count}\n")
+
 
 print('Parabéns! Você resolveu o puzzle.')
