@@ -1,8 +1,8 @@
 import random
 import os
+from collections import deque
+import heapq
 
-
-move_count = 0
 def clear():
     if(os.name == 'posix'):
         os.system('clear')
@@ -35,12 +35,6 @@ def gera_matriz_aleatoria():
     return matriz
 
 def nao_resolvida():
-    matriz_final = [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 0]
-    ]
-    
     matriz = gera_matriz_aleatoria()
     
     while not resolvivel(matriz):
@@ -56,7 +50,6 @@ def encontrar_posicao(mat, num):
     return None, None
 
 def mover_numero(mat, num):
-    global move_count
     linha_num, coluna_num = encontrar_posicao(mat, num)
     linha_zero, coluna_zero = encontrar_posicao(mat, 0)
     
@@ -66,33 +59,200 @@ def mover_numero(mat, num):
     
     if (abs(linha_zero - linha_num) == 1 and coluna_zero == coluna_num):  #movimento vertical
         trocar_vertical(mat, linha_num, coluna_num, linha_zero, coluna_zero)
-        move_count += 1
         clear()
     elif (abs(coluna_zero - coluna_num) == 1 and linha_zero == linha_num):  #movimento horizontal
         trocar_horizontal(mat[linha_num], coluna_num, coluna_zero)
-        move_count += 1
         clear()
     else:
         clear()
-        print('Movimento não válido.') #remover so ta aqui pra debug
-        
+        print('Movimento não válido.')
 
-#inicializacao
-matriz = nao_resolvida()
+# Funções para resolver via IA
 
-print('Início')
-clear()
-while matriz != [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 0]
-]:
-    for linha in matriz:
-        print(linha)
+def encontrar_zero(matriz):
+    for i in range(3):
+        for j in range(3):
+            if matriz[i][j] == 0:
+                return i, j
+    return None, None
+
+def expande_estado(matriz):
+    linha_zero, coluna_zero = encontrar_zero(matriz)
+    estados = []
+
+    movimentos = [
+        (-1, 0),  # cima
+        (1, 0),   # baixo
+        (0, -1),  # esquerda
+        (0, 1)    # direita
+    ]
     
-    num = int(input('Qual número deseja mover? '))
-    mover_numero(matriz, num)
-    print(f"Total de movimentos: {move_count}\n")
+    for mov in movimentos:
+        nova_linha = linha_zero + mov[0]
+        nova_coluna = coluna_zero + mov[1]
 
+        if 0 <= nova_linha < 3 and 0 <= nova_coluna < 3:
+            nova_matriz = [linha[:] for linha in matriz]
+            trocar_vertical(nova_matriz, linha_zero, coluna_zero, nova_linha, nova_coluna)
+            estados.append(nova_matriz)
+    
+    return estados
 
-print('Parabéns! Você resolveu o puzzle.')
+def estado_final(matriz):
+    return matriz == [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 0]
+    ]
+
+def heuristica(matriz):
+    distancia = 0
+    posicoes_finais = {
+        1: (0, 0), 2: (0, 1), 3: (0, 2),
+        4: (1, 0), 5: (1, 1), 6: (1, 2),
+        7: (2, 0), 8: (2, 1), 0: (2, 2)
+    }
+    
+    for i in range(3):
+        for j in range(3):
+            numero = matriz[i][j]
+            pos_final = posicoes_finais[numero]
+            distancia += abs(i - pos_final[0]) + abs(j - pos_final[1])
+    
+    return distancia
+
+def reconstruir_caminho(estado_final, pais):
+    caminho = []
+    atual = str(estado_final)
+    while atual is not None:
+        caminho.append(eval(atual))
+        atual = pais[atual]
+    caminho.reverse()
+    return caminho
+
+def imprimir_caminho(caminho):
+    print("\nSolução encontrada! Caminho:")
+    for passo, estado in enumerate(caminho):
+        print(f"Passo {passo}:")
+        for linha in estado:
+            print(linha)
+        print()
+
+# largura
+def largura(inicial):
+    fila = deque([(inicial, None)])  
+    visitados = set()
+    visitados.add(str(inicial))
+    pais = {str(inicial): None}
+    estados_visitados = 0
+
+    while fila:
+        atual, pai = fila.popleft()
+        estados_visitados += 1
+
+        if estado_final(atual):
+            caminho = reconstruir_caminho(atual, pais)
+            imprimir_caminho(caminho)
+            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            return atual
+        
+        for estado in expande_estado(atual):
+            if str(estado) not in visitados:
+                fila.append((estado, atual))
+                visitados.add(str(estado))
+                pais[str(estado)] = str(atual)
+
+    print("Sem solução.")
+
+# profundidade
+def profundidade(inicial):
+    pilha = [(inicial, None)]  
+    visitados = set()
+    visitados.add(str(inicial))
+    pais = {str(inicial): None}
+    estados_visitados = 0
+
+    while pilha:
+        atual, pai = pilha.pop()
+        estados_visitados += 1
+
+        if estado_final(atual):
+            caminho = reconstruir_caminho(atual, pais)
+            imprimir_caminho(caminho)
+            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            return atual
+        
+        for estado in expande_estado(atual):
+            if str(estado) not in visitados:
+                pilha.append((estado, atual))
+                visitados.add(str(estado))
+                pais[str(estado)] = str(atual)
+
+    print("Sem solução.")
+
+# A*
+def a(inicial):
+    fila_prioridade = []
+    heapq.heappush(fila_prioridade, (heuristica(inicial), inicial, None))
+    visitados = set()
+    visitados.add(str(inicial))
+    pais = {str(inicial): None}
+    estados_visitados = 0
+
+    while fila_prioridade:
+        _, atual, pai = heapq.heappop(fila_prioridade)
+        estados_visitados += 1
+
+        if estado_final(atual):
+            caminho = reconstruir_caminho(atual, pais)
+            imprimir_caminho(caminho)
+            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            return atual
+        
+        for estado in expande_estado(atual):
+            if str(estado) not in visitados:
+                heapq.heappush(fila_prioridade, (heuristica(estado), estado, atual))
+                visitados.add(str(estado))
+                pais[str(estado)] = str(atual)
+
+    print("Sem solução.")
+
+# Função para escolher o modo de jogo
+def escolha_modo():
+    print("Escolha o modo de jogo:")
+    print("1 - Jogar manualmente")
+    print("2 - Resolver com Busca em Largura")
+    print("3 - Resolver com Busca em Profundidade")
+    print("4 - Resolver com A*")
+
+    escolha = int(input("Digite o número da sua escolha: "))
+    
+    if escolha == 1:
+        jogar_manual()
+    elif escolha == 2:
+        largura(matriz)
+    elif escolha == 3:
+        profundidade(matriz)
+    elif escolha == 4:
+        a(matriz)
+    else:
+        print("Escolha inválida!")
+
+# Função para jogar manualmentes
+def jogar_manual():
+    while matriz != [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 0]
+    ]:
+        for linha in matriz:
+            print(linha)
+        
+        num = int(input('Qual número deseja mover? '))
+        mover_numero(matriz, num)
+
+    print('Parabéns! Você resolveu o puzzle.')
+
+# Inicialização do jogo
+matriz = nao_resolvida()
+escolha_modo()
