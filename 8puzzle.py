@@ -67,7 +67,6 @@ def mover_numero(mat, num):
         clear()
         print('Movimento não válido.')
 
-# Funções para resolver via IA
 
 def encontrar_zero(matriz):
     for i in range(3):
@@ -81,10 +80,10 @@ def expande_estado(matriz):
     estados = []
 
     movimentos = [
-        (-1, 0),  # cima
-        (1, 0),   # baixo
-        (0, -1),  # esquerda
-        (0, 1)    # direita
+        (-1, 0), 
+        (1, 0),   
+        (0, -1),  
+        (0, 1)   
     ]
     
     for mov in movimentos:
