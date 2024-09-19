@@ -68,6 +68,7 @@ def mover_numero(mat, num):
         print('Movimento não válido.')
 
 
+
 def encontrar_zero(matriz):
     for i in range(3):
         for j in range(3):
@@ -80,10 +81,10 @@ def expande_estado(matriz):
     estados = []
 
     movimentos = [
-        (-1, 0), 
-        (1, 0),   
-        (0, -1),  
-        (0, 1)   
+        (-1, 0),  # cima
+        (1, 0),   # baixo
+        (0, -1),  # esquerda
+        (0, 1)    # direita
     ]
     
     for mov in movimentos:
@@ -140,51 +141,51 @@ def imprimir_caminho(caminho):
 # largura
 def largura(inicial):
     fila = deque([(inicial, None)])  
-    visitados = set()
-    visitados.add(str(inicial))
+    encontrados = set()
+    encontrados.add(str(inicial))
     pais = {str(inicial): None}
-    estados_visitados = 0
+    estados_encontrados = 0
 
     while fila:
         atual, pai = fila.popleft()
-        estados_visitados += 1
+        estados_encontrados += 1
 
         if estado_final(atual):
             caminho = reconstruir_caminho(atual, pais)
             imprimir_caminho(caminho)
-            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            print(f"Solução encontrada em {estados_encontrados} estados encontrados!")
             return atual
         
         for estado in expande_estado(atual):
-            if str(estado) not in visitados:
+            if str(estado) not in encontrados:
                 fila.append((estado, atual))
-                visitados.add(str(estado))
+                encontrados.add(str(estado))
                 pais[str(estado)] = str(atual)
 
     print("Sem solução.")
 
-# profundidade
+# Profundidade
 def profundidade(inicial):
     pilha = [(inicial, None)]  
-    visitados = set()
-    visitados.add(str(inicial))
+    encontrados = set()
+    encontrados.add(str(inicial))
     pais = {str(inicial): None}
-    estados_visitados = 0
+    estados_encontrados = 0
 
     while pilha:
         atual, pai = pilha.pop()
-        estados_visitados += 1
+        estados_encontrados += 1
 
         if estado_final(atual):
             caminho = reconstruir_caminho(atual, pais)
             imprimir_caminho(caminho)
-            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            print(f"Solução encontrada em {estados_encontrados} estados encontrados!")
             return atual
         
         for estado in expande_estado(atual):
-            if str(estado) not in visitados:
+            if str(estado) not in encontrados:
                 pilha.append((estado, atual))
-                visitados.add(str(estado))
+                encontrados.add(str(estado))
                 pais[str(estado)] = str(atual)
 
     print("Sem solução.")
@@ -193,30 +194,30 @@ def profundidade(inicial):
 def a(inicial):
     fila_prioridade = []
     heapq.heappush(fila_prioridade, (heuristica(inicial), inicial, None))
-    visitados = set()
-    visitados.add(str(inicial))
+    encontrados = set()
+    encontrados.add(str(inicial))
     pais = {str(inicial): None}
-    estados_visitados = 0
+    estados_encontrados = 0
 
     while fila_prioridade:
         _, atual, pai = heapq.heappop(fila_prioridade)
-        estados_visitados += 1
+        estados_encontrados += 1
 
         if estado_final(atual):
             caminho = reconstruir_caminho(atual, pais)
             imprimir_caminho(caminho)
-            print(f"Solução encontrada em {estados_visitados} estados visitados!")
+            print(f"Solução encontrada em {estados_encontrados} estados encontrados!")
             return atual
         
         for estado in expande_estado(atual):
-            if str(estado) not in visitados:
+            if str(estado) not in encontrados:
                 heapq.heappush(fila_prioridade, (heuristica(estado), estado, atual))
-                visitados.add(str(estado))
+                encontrados.add(str(estado))
                 pais[str(estado)] = str(atual)
 
     print("Sem solução.")
+4
 
-# Função para escolher o modo de jogo
 def escolha_modo():
     print("Escolha o modo de jogo:")
     print("1 - Jogar manualmente")
@@ -237,7 +238,7 @@ def escolha_modo():
     else:
         print("Escolha inválida!")
 
-# Função para jogar manualmentes
+
 def jogar_manual():
     while matriz != [
         [1, 2, 3],
@@ -252,6 +253,6 @@ def jogar_manual():
 
     print('Parabéns! Você resolveu o puzzle.')
 
-# Inicialização do jogo
+
 matriz = nao_resolvida()
 escolha_modo()
