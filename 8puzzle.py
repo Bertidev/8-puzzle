@@ -42,6 +42,19 @@ def nao_resolvida():
 
     return matriz
 
+def inserir_matriz():
+    matriz = []
+    print("Insira os números da matriz, de 0 a 8, separados por espaços. Exemplo: 1 2 3 4 5 6 7 8 0")
+    for i in range(3):
+        linha = list(map(int, input(f"Insira a linha {i+1}: ").split()))
+        matriz.append(linha)
+    
+    if resolvivel(matriz):
+        return matriz
+    else:
+        print("A matriz inserida não é resolvível. Gerando uma matriz aleatória resolvível.")
+        return nao_resolvida()
+
 def encontrar_posicao(mat, num):
     for i in range(3):
         for j in range(3):
@@ -66,8 +79,6 @@ def mover_numero(mat, num):
     else:
         clear()
         print('Movimento não válido.')
-
-
 
 def encontrar_zero(matriz):
     for i in range(3):
@@ -116,6 +127,8 @@ def heuristica(matriz):
     for i in range(3):
         for j in range(3):
             numero = matriz[i][j]
+            if numero == 0: 
+                continue
             pos_final = posicoes_finais[numero]
             distancia += abs(i - pos_final[0]) + abs(j - pos_final[1])
     
@@ -216,43 +229,71 @@ def a(inicial):
                 pais[str(estado)] = str(atual)
 
     print("Sem solução.")
-4
+
+def escolha_matriz():
+    print("Escolha uma opção para iniciar:")
+    print("1 - Gerar um jogo aleatório")
+    print("2 - Inserir um jogo manualmente")
+    escolha = int(input("Digite o número da sua escolha: "))
+    
+    if escolha == 1:
+        return nao_resolvida()
+    elif escolha == 2:
+        return inserir_matriz()
+    else:
+        print("Escolha inválida!")
+        return escolha_matriz()
 
 def escolha_modo():
-    print("Escolha o modo de jogo:")
-    print("1 - Jogar manualmente")
-    print("2 - Resolver com Busca em Largura")
-    print("3 - Resolver com Busca em Profundidade")
-    print("4 - Resolver com A*")
+    print("Escolha o método de resolução ou jogar o jogo:")
+    print("1 - Resolver com Busca em Largura")
+    print("2 - Resolver com Busca em Profundidade")
+    print("3 - Resolver com A*")
+    print("4 - Jogar o jogo manualmente")
 
     escolha = int(input("Digite o número da sua escolha: "))
     
     if escolha == 1:
-        jogar_manual()
-    elif escolha == 2:
         largura(matriz)
-    elif escolha == 3:
+    elif escolha == 2:
         profundidade(matriz)
-    elif escolha == 4:
+    elif escolha == 3:
         a(matriz)
+    elif escolha == 4:
+        jogar()
     else:
         print("Escolha inválida!")
+        escolha_modo()
 
-
-def jogar_manual():
-    while matriz != [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 0]
-    ]:
+def jogar():
+    print("Você escolheu jogar o jogo!")
+    print("Matriz atual:")
+    for linha in matriz:
+        print(linha)
+    
+    while not estado_final(matriz):
+        print("\nDigite o número que deseja mover (ou -1 para parar):")
+        num = int(input())
+        
+        if num == -1:
+            break
+        else:
+            mover_numero(matriz, num)
+        
+        print("Matriz atual:")
         for linha in matriz:
             print(linha)
-        
-        num = int(input('Qual número deseja mover? '))
-        mover_numero(matriz, num)
 
-    print('Parabéns! Você resolveu o puzzle.')
+    if estado_final(matriz):
+        print("Parabéns, você resolveu o puzzle!")
 
+def jogar_novamente():
+    resposta = input("Deseja resolver o jogo de outra maneira? (s/n): ").lower()
+    if resposta == 's':
+        clear()
+        escolha_modo()
+        jogar_novamente()
 
-matriz = nao_resolvida()
+matriz = escolha_matriz()
 escolha_modo()
+jogar_novamente()
